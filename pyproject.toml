@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "blood-hound-python-client"
-version = "2.0.0"
+version = "2.0.1"
 description = "A client library for accessing BloodHound API"
 authors = ["SpecterOps <info@specterops.io>"]
 license = "APACHE"

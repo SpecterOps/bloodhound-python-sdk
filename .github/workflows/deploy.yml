@@ -1,0 +1,48 @@
+#
+# This was developed with the aid of chatGPT o-1.  There may be some workflows in the github community that provide some of this functionality.
+# The philosophy of the workflow(s) is to assume that the user making the PR has already updated the json, and local to them generated the SDK and tested it.
+# The workflow(s) check and report if the version hasn't been updated.  It checks as opposed to fully automates.
+#
+
+name: Build and Deploy to PyPI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    name: Build and Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'  
+
+      - name: Install Dependencies
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install
+          pip install openapi-python-client
+
+      - name: Generate SDK
+        run: |
+          openapi-python-client generate --path openapi/openapi.json --output sdk --meta none
+
+      - name: Build Package
+        run: |
+          poetry build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: '__token__'
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          poetry publish --username $TWINE_USERNAME --password $TWINE_PASSWORD

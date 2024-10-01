@@ -1,0 +1,83 @@
+#
+# This was developed with the aid of chatGPT o-1.  There may be some workflows in the github community that provide some of this functionality.
+# The philosophy of the workflow(s) is to assume that the user making the PR has already updated the json, and local to them generated the SDK and tested it.
+# The workflow(s) check and report if the version hasn't been updated.  It checks as opposed to fully automates.
+#
+
+name: PR Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  pr_checks:
+    name: Pre-Merge Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for version comparison
+
+      - name: Set Up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.8'  # Adjust to your project's Python version
+
+      - name: Install Dependencies
+        run: |
+          pip install poetry
+          poetry config virtualenvs.create false
+          poetry install
+          pip install openapi-python-client
+
+      - name: Check Version Update
+        id: check_version
+        run: |
+          git fetch origin main
+          CURRENT_VERSION=$(grep '^version' pyproject.toml | head -1 | cut -d '"' -f2)
+          PREVIOUS_VERSION=$(git show origin/main:pyproject.toml | grep '^version' | head -1 | cut -d '"' -f2)
+          echo "Current version: $CURRENT_VERSION"
+          echo "Previous version: $PREVIOUS_VERSION"
+          if [ "$CURRENT_VERSION" = "$PREVIOUS_VERSION" ]; then
+            echo "::error ::Version has not been updated! Current version ($CURRENT_VERSION) is the same as main branch."
+            exit 1
+          else
+            echo "Version has been updated."
+          fi
+
+      - name: Generate SDK
+        run: |
+          openapi-python-client generate --path openapi/openapi.json --output sdk
+
+      - name: Build Package
+        run: |
+          poetry build
+
+      # Optional: Post Comment on Failure
+      - name: Post Comment on Failure
+        if: failure()
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ github.event.pull_request.number }},
+              owner: ${{ github.repository.owner.login }},
+              repo: ${{ github.repository.name }},
+              body: ':x: **PR Checks Failed**\n\nPlease ensure the version number in `pyproject.toml` has been updated and that the SDK builds without errors. See the [workflow run](${{ github.run_url }}) for details.'
+            })
+
+      # Optional: Post Comment on Success
+      - name: Post Comment on Success
+        if: success() && github.event.action == 'opened'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: ${{ github.event.pull_request.number }},
+              owner: ${{ github.repository.owner.login }},
+              repo: ${{ github.repository.name }},
+              body: ':white_check_mark: **PR Checks Passed**\n\nYour changes are ready for review.'
+            })
