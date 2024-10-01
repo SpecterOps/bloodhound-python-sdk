@@ -1,7 +1,23 @@
-import base64
+# Copyright 2023 Specter Ops, Inc.
+#
+# Licensed under the Apache License, Version 2.0
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0import base64
+
 import datetime
 import hashlib
 import hmac
+import base64
 from typing import Optional
 
 import httpx
@@ -110,4 +126,24 @@ class HMACAuthenticatedClient(AuthenticatedClient):
                 **self._httpx_args,
             )
         return self._client
+
+    def get_async_httpx_client(self) -> httpx.AsyncClient:
+        """Get the underlying httpx.AsyncClient, constructing a new one if not previously set"""
+        if self._async_client is None:
+            mounts = {
+                "all://bloodhound.localhost": httpx.AsyncHTTPTransport(proxy="http://localhost"),
+            }
+            self._async_client = httpx.AsyncClient(
+                base_url=self._base_url,
+                cookies=self._cookies,
+                headers=self._headers,
+                mounts=mounts,
+                timeout=self._timeout,
+                verify=self._verify_ssl,
+                follow_redirects=self._follow_redirects,
+                auth=self.auth,
+                **self._httpx_args,
+            )
+        return self._async_client
+
 
