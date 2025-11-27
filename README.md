@@ -32,6 +32,8 @@ Now call your endpoint and use your models:
 from blood_hound_api_client import AuthenticatedClient
 from blood_hound_api_client.api.api_info import get_api_version
 from blood_hound_api_client.models import GetApiVersionResponse200
+from blood_hound_api_client.types import Response
+
 
 with client as client:
     version: GetApiVersionResponse200 = get_api_version.sync(client=client)
@@ -46,6 +48,8 @@ Or do the same thing with an async version:
 from blood_hound_api_client import AuthenticatedClient
 from blood_hound_api_client.api.api_info import get_api_version
 from blood_hound_api_client.models import GetApiVersionResponse200
+from blood_hound_api_client.types import Response
+
 
 async with client as client:
     version: GetApiVersionResponse200 = await get_api_version.asyncio(client=client)
