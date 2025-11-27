@@ -38,6 +38,7 @@ with client as client::
     response: Response[GetApiVersionResponse200] = get_api_version.sync_detailed(client=client)
     print(f"version: {version.data.api}")
     print(f"response: {response}")
+```
 
 Or do the same thing with an async version:
 
