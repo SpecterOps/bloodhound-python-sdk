@@ -72,7 +72,6 @@ There are more settings on the generated `Client` class which let you control mo
 
 
 # Or get the underlying httpx client to modify directly with client.get_httpx_client() or client.get_async_httpx_client()
-```
 
 You can even set the httpx client directly, but beware that this will override any existing settings (e.g., base_url):
 
