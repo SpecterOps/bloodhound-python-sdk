@@ -33,7 +33,7 @@ from blood_hound_api_client import AuthenticatedClient
 from blood_hound_api_client.api.api_info import get_api_version
 from blood_hound_api_client.models import GetApiVersionResponse200
 
-with client as client::
+with client as client:
     version: GetApiVersionResponse200 = get_api_version.sync(client=client)
     response: Response[GetApiVersionResponse200] = get_api_version.sync_detailed(client=client)
     print(f"version: {version.data.api}")
@@ -48,7 +48,7 @@ from blood_hound_api_client.api.api_info import get_api_version
 from blood_hound_api_client.models import GetApiVersionResponse200
 
 async with client as client:
-    version:: GetApiVersionResponse200 = await get_api_version.asyncio(client=client)
+    version: GetApiVersionResponse200 = await get_api_version.asyncio(client=client)
     response: Response[GetApiVersionResponse200] = await get_api_version.asyncio_detailed(client=client)
     print(f"version: {version.data.api}")
     print(f"response: {response}")
