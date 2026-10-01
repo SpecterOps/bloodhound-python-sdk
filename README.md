@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repository has been archived and is no longer maintained
+
 # blood-hound-api-client
 A client library for accessing BloodHound API
 
